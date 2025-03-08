@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* CSS permanece igual ao anterior */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        body.light {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        body.dark {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: #007bff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: #0056b3;
+        }
+
+        nav a.active {
+            background-color: #0056b3;
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .tab-content {
+            display: none;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .theme-selector {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 450px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 40%;
+            min-width: 120px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .search-input {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 60%;
+            min-width: 150px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark select, body.dark .search-input {
+            background-color: #444;
+            color: #f0f0f0;
+            border-color: #666;
+        }
+
+        .stats {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #555;
+        }
+
+        body.dark .stats {
+            color: #ccc;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #28a745;
+            transition: width 0.3s ease;
+        }
+
+        body.dark .progress-bar {
+            background-color: #555;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            width: 100%;
+            height: 250px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.3rem;
+            transition: background-color 0.3s;
+            border-radius: 15px;
+        }
+
+        .front {
+            z-index: 2;
+        }
+
+        .back {
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        .theme-Geografia .front { background-color: #cce5ff; }
+        .theme-História .front { background-color: #fff3cd; }
+        .theme-Programação .front { background-color: #d4edda; }
+        .theme-Nefrologia .front { background-color: #f8d7da; }
+        .back { background-color: #e0f7fa; }
+
+        body.dark .front { background-color: #444; }
+        body.dark .back { background-color: #555; }
+
+        .buttons, .difficulty-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .difficulty-buttons button {
+            background-color: #6c757d;
+        }
+
+        .difficulty-buttons button:hover {
+            background-color: #5a6268;
+        }
+
+        .add-card-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-card-form button {
+            background-color: #28a745;
+        }
+
+        .add-card-form button:hover {
+            background-color: #218838;
+        }
+
+        .card-list {
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .card-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 8px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark .card-item {
+            background-color: #444;
+        }
+
+        .card-item button {
+            padding: 6px 12px;
+        }
+
+        .card-item button:hover {
+            transform: scale(1.1);
+        }
+
+        .card-item .edit-btn {
+            background-color: #ffc107;
+            margin-right: 8px;
+        }
+
+        .card-item .edit-btn:hover {
+            background-color: #e0a800;
+        }
+
+        #theme-toggle {
+            background-color: #ffc107;
+        }
+
+        #theme-toggle:hover {
+            background-color: #e0a800;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark .modal-content {
+            background-color: #444;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 15px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        body.dark .modal-content input {
+            background-color: #555;
+            color: #f0f0f0;
+            border-color: #666;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .welcome-container {
+            display: flex;
+            flex-wrap: wrap;
+            text-align: center;
+            justify-content: center;
+            padding: 40px 20px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .welcome-container h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .welcome-container p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        body.dark .welcome-container h1 {
+            color: #66b0ff;
+        }
+
+        body.dark .welcome-container p {
+            color: #ccc;
+        }
+
+        .welcome-container button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            background-color: #28a745;
+        }
+
+        .welcome-container button:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .flashcard {
+                height: 200px;
+            }
+
+            .front, .back {
+                font-size: 1.1rem;
+            }
+
+            button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .theme-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            select, .search-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="light">
+    <nav>
+        <div>
+            <a href="#" class="active" onclick="showTab('home'); return false;">Home</a>
+            <a href="#" onclick="showTab('study'); return false;">Estudo</a>
+            <a href="#" onclick="showTab('manage'); return false;">Gerenciar</a>
+        </div>
+        <button id="theme-toggle" onclick="toggleTheme()"><i class="fas fa-adjust"></i> Mudar Tema</button>
+    </nav>
+
+    <main>
+        <div id="home" class="tab-content active">
+            <div class="welcome-container">
+                <h1>Bem-vindo ao Flashcards App!</h1>
+                <p>Aprenda de forma prática e divertida com nossos flashcards interativos. Escolha um tema, estude e gerencie seus cartões!</p>
+                <button onclick="showTab('study')"><i class="fas fa-book"></i> Começar a Estudar</button>
+            </div>
+        </div>
+
+        <div id="study" class="tab-content">
+            <div class="theme-selector">
+                <select id="theme-select" onchange="changeTheme()">
+                    <option value="all">Todos os Temas</option>
+                </select>
+                <input type="text" class="search-input" id="search" placeholder="Pesquisar..." onkeyup="searchFlashcards()">
+            </div>
+            <div class="stats" id="stats"></div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="front" id="front">Carregando...</div>
+                    <div class="back" id="back">Carregando...</div>
+                </div>
+            </div>
+            <div class="buttons">
+                <button onclick="prevCard()"><i class="fas fa-arrow-left"></i> Anterior</button>
+                <button onclick="flipCard()"><i class="fas fa-sync-alt"></i> Virar</button>
+                <button onclick="nextCard()">Próximo <i class="fas fa-arrow-right"></i></button>
+            </div>
+            <div class="difficulty-buttons">
+                <button onclick="rateDifficulty(1)"><i class="fas fa-exclamation"></i> Difícil</button>
+                <button onclick="rateDifficulty(2)"><i class="fas fa-equals"></i> Médio</button>
+                <button onclick="rateDifficulty(3)"><i class="fas fa-check"></i> Fácil</button>
+            </div>
+        </div>
+
+        <div id="manage" class="tab-content">
+            <div class="add-card-form">
+                <button onclick="openAddModal()"><i class="fas fa-plus"></i> Adicionar Novo Cartão</button>
+            </div>
+            <div class="card-list" id="card-list"></div>
+        </div>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Adicionar Cartão</h2>
+            <input type="text" id="modal-front" placeholder="Pergunta (frente)">
+            <input type="text" id="modal-back" placeholder="Resposta (verso)">
+            <input type="text" id="modal-theme" placeholder="Tema (ex.: Nefrologia)">
+            <div class="modal-buttons">
+                <button onclick="saveCardFromModal()"><i class="fas fa-save"></i> Salvar</button>
+                <button onclick="closeModal()"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Declarações globais
+        const defaultFlashcards = [
+            { front: "Qual é a capital do Brasil?", back: "Brasília", theme: "Geografia", interval: 1, nextReview: Date.now(), protected: true },
+            { front: "Qual é o maior continente?", back: "Ásia", theme: "Geografia", interval: 1, nextReview: Date.now(), protected: true },
+            { front: "Quem descobriu o Brasil?", back: "Pedro Álvares Cabral", theme: "História", interval: 1, nextReview: Date.now(), protected: true },
+            { front: "O que faz display: flex?", back: "Ativa o Flexbox", theme: "Programação", interval: 1, nextReview: Date.now(), protected: true },
+            { front: "Qual é a função principal dos rins?", back: "Filtrar o sangue", theme: "Nefrologia", interval: 1, nextReview: Date.now(), protected: true }
+        ];
+
+        let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [...defaultFlashcards];
+        let filteredFlashcards = [...flashcards];
+        let currentCard = 0;
+        let currentTheme = "all";
+        let editIndex = null;
+
+        let flashcardEl, front, back, themeSelect, statsEl, progressEl, modal, searchInput;
+
+        function updateCard() {
+            console.log('Atualizando cartão...');
+            console.log('Flashcards disponíveis:', filteredFlashcards);
+            if (!front || !back) {
+                console.error('Elementos front ou back não encontrados');
+                return;
+            }
+            if (filteredFlashcards.length === 0) {
+                front.textContent = "Nenhum cartão encontrado";
+                back.textContent = "Adicione ou ajuste a busca!";
+                flashcardEl.classList.remove('flipped');
+                flashcardEl.className = 'flashcard';
+            } else {
+                currentCard = Math.max(0, Math.min(currentCard, filteredFlashcards.length - 1));
+                front.textContent = filteredFlashcards[currentCard].front;
+                back.textContent = filteredFlashcards[currentCard].back;
+                flashcardEl.className = 'flashcard theme-' + filteredFlashcards[currentCard].theme;
+                flashcardEl.classList.remove('flipped');
+            }
+            updateStats();
+            updateProgress();
+        }
+
+        function flipCard() {
+            flashcardEl.classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            if (filteredFlashcards.length === 0) return;
+            flashcardEl.classList.remove('flipped');
+            setTimeout(() => {
+                currentCard = (currentCard + 1) % filteredFlashcards.length;
+                sortFlashcards();
+                updateCard();
+            }, 300);
+        }
+
+        function prevCard() {
+            if (filteredFlashcards.length === 0) return;
+            flashcardEl.classList.remove('flipped');
+            setTimeout(() => {
+                currentCard = (currentCard - 1 + filteredFlashcards.length) % filteredFlashcards.length;
+                updateCard();
+            }, 300);
+        }
+
+        function openAddModal() {
+            editIndex = null;
+            document.getElementById('modal-title').textContent = "Adicionar Cartão";
+            document.getElementById('modal-front').value = '';
+            document.getElementById('modal-back').value = '';
+            document.getElementById('modal-theme').value = '';
+            modal.style.display = 'flex';
+        }
+
+        function openEditModal(index) {
+            editIndex = index;
+            const card = flashcards[index];
+            document.getElementById('modal-title').textContent = "Editar Cartão";
+            document.getElementById('modal-front').value = card.front;
+            document.getElementById('modal-back').value = card.back;
+            document.getElementById('modal-theme').value = card.theme;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        function saveCardFromModal() {
+            const newFront = document.getElementById('modal-front').value;
+            const newBack = document.getElementById('modal-back').value;
+            const newTheme = document.getElementById('modal-theme').value.trim();
+
+            if (newFront && newBack && newTheme) {
+                if (editIndex === null) {
+                    flashcards.push({ front: newFront, back: newBack, theme: newTheme, interval: 1, nextReview: Date.now(), protected: false });
+                } else {
+                    flashcards[editIndex] = { ...flashcards[editIndex], front: newFront, back: newBack, theme: newTheme };
+                }
+                saveFlashcards();
+                updateCardList();
+                updateThemeOptions();
+                changeTheme();
+                closeModal();
+            } else {
+                alert("Preencha todos os campos!");
+            }
+        }
+
+        function deleteCard(index) {
+            if (flashcards[index].protected) {
+                alert("Este cartão não pode ser excluído!");
+                return;
+            }
+            flashcards.splice(index, 1);
+            saveFlashcards();
+            updateCardList();
+            updateThemeOptions();
+            changeTheme();
+        }
+
+        function rateDifficulty(difficulty) {
+            if (filteredFlashcards.length === 0) return;
+            const card = filteredFlashcards[currentCard];
+            if (difficulty === 1) card.interval = 1;
+            else if (difficulty === 2) card.interval *= 2;
+            else if (difficulty === 3) card.interval *= 4;
+            card.nextReview = Date.now() + card.interval * 24 * 60 * 60 * 1000;
+            saveFlashcards();
+            flashcardEl.classList.remove('flipped');
+            setTimeout(nextCard, 200);
+        }
+
+        function sortFlashcards() {
+            filteredFlashcards.sort((a, b) => a.nextReview - b.nextReview);
+        }
+
+        function saveFlashcards() {
+            localStorage.setItem('flashcards', JSON.stringify(flashcards));
+        }
+
+        function updateCardList() {
+            const cardList = document.getElementById('card-list');
+            cardList.innerHTML = '';
+            flashcards.forEach((card, index) => {
+                const div = document.createElement('div');
+                div.className = 'card-item';
+                div.innerHTML = `
+                    <span>${card.theme}: ${card.front} - ${card.back}</span>
+                    <div>
+                        <button class="edit-btn" onclick="openEditModal(${index})"><i class="fas fa-edit"></i> Editar</button>
+                        ${card.protected ? '' : `<button onclick="deleteCard(${index})"><i class="fas fa-trash"></i> Excluir</button>`}
+                    </div>
+                `;
+                cardList.appendChild(div);
+            });
+        }
+
+        function updateThemeOptions() {
+            if (!themeSelect) {
+                console.error('Elemento theme-select não encontrado');
+                return;
+            }
+            console.log('Atualizando opções de tema...');
+            const themes = [...new Set(flashcards.map(card => card.theme))];
+            themeSelect.innerHTML = '<option value="all">Todos os Temas</option>';
+            themes.forEach(theme => {
+                const option = document.createElement('option');
+                option.value = theme;
+                option.textContent = theme;
+                themeSelect.appendChild(option);
+            });
+            themeSelect.value = currentTheme;
+        }
+
+        function changeTheme() {
+            currentTheme = themeSelect.value;
+            searchFlashcards();
+        }
+
+        function searchFlashcards() {
+            const query = searchInput.value.toLowerCase();
+            let baseFlashcards = currentTheme === "all" ? flashcards : flashcards.filter(card => card.theme === currentTheme);
+            filteredFlashcards = baseFlashcards.filter(card => 
+                card.front.toLowerCase().includes(query) || card.back.toLowerCase().includes(query)
+            );
+            currentCard = 0;
+            sortFlashcards();
+            updateCard();
+        }
+
+        function updateStats() {
+            const total = filteredFlashcards.length;
+            const difficult = filteredFlashcards.filter(c => c.interval <= 1).length;
+            const medium = filteredFlashcards.filter(c => c.interval > 1 && c.interval <= 4).length;
+            const easy = filteredFlashcards.filter(c => c.interval > 4).length;
+            statsEl.textContent = `Total: ${total} | Difícil: ${difficult} | Médio: ${medium} | Fácil: ${easy}`;
+        }
+
+        function updateProgress() {
+            const total = filteredFlashcards.length;
+            const progress = total === 0 ? 0 : ((currentCard + 1) / total) * 100;
+            progressEl.style.width = `${progress}%`;
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`nav a[onclick="showTab('${tabId}'); return false;"]`).classList.add('active');
+            if (tabId === 'study' && front && back) {
+                updateCard();
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            document.body.classList.toggle('dark');
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        // Inicialização após o DOM estar carregado
+        document.addEventListener('DOMContentLoaded', () => {
+            flashcardEl = document.getElementById('flashcard');
+            front = document.getElementById('front');
+            back = document.getElementById('back');
+            themeSelect = document.getElementById('theme-select');
+            statsEl = document.getElementById('stats');
+            progressEl = document.getElementById('progress');
+            modal = document.getElementById('modal');
+            searchInput = document.getElementById('search');
+
+            console.log('Iniciando app...');
+            console.log('Flashcards carregados:', flashcards);
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.remove('light');
+                document.body.classList.add('dark');
+            }
+            updateThemeOptions();
+            filteredFlashcards = [...flashcards];
+            sortFlashcards();
+            updateCardList();
+            showTab('home'); // Exibe a aba Home por padrão
+        });
+    </script>
+</body>
+</html>
