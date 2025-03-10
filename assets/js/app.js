@@ -6,16 +6,15 @@
             { front: "O que faz display: flex?", back: "Ativa o Flexbox", theme: "Programação", interval: 1, nextReview: Date.now(), protected: true },
             { front: "Qual é a função principal dos rins?", back: "Filtrar o sangue", theme: "Nefrologia", interval: 1, nextReview: Date.now(), protected: true }
         ];
-
-        let studyTime = parseInt(localStorage.getItem('studyTime')) || 0;
-        let lastInteraction = null;
+        
         let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [...defaultFlashcards];
         let filteredFlashcards = [...flashcards];
         let currentCard = 0;
         let currentTheme = "all";
         let editIndex = null;
+        let studyTime = parseInt(localStorage.getItem('studyTime')) || 0;
+        let lastInteraction = null;
         
-
         let flashcardEl, front, back, themeSelect, statsEl, progressEl, modal, searchInput;
 
         const themeIcons = {
@@ -27,8 +26,6 @@
         };
 
         function updateCard() {
-            console.log('Atualizando cartão...');
-            console.log('Flashcards disponíveis:', filteredFlashcards);
             const frontTheme = document.getElementById('front-theme');
             const backTheme = document.getElementById('back-theme');
             const frontContent = document.getElementById('front-content');
@@ -51,36 +48,28 @@
                 const card = filteredFlashcards[currentCard];
                 const iconClass = themeIcons[card.theme] || themeIcons["all"];
                 frontTheme.innerHTML = `<i class="fas ${iconClass}"></i> ${card.theme}`;
-                frontContent.textContent = card.front;
+                frontContent.innerHTML = card.front;
                 backTheme.innerHTML = `<i class="fas ${iconClass}"></i> ${card.theme}`;
-                backContent.textContent = card.back;
+                
+                // Se houver imagem, exibe-a; senão, exibe o texto/fórmula
+                if (card.image) {
+                    backContent.innerHTML = `<img src="${card.image}" alt="Flashcard Image" style="max-width: 100%; max-height: 80%;">`;
+                } else {
+                    backContent.innerHTML = card.back;
+                }
+                
                 flashcardEl.className = 'flashcard theme-' + card.theme;
                 flashcardEl.classList.remove('flipped');
+        
+                if (typeof MathJax !== 'undefined' && !card.image) {
+                    MathJax.typesetPromise([backContent]).catch(err => console.error('Erro ao renderizar MathJax:', err));
+                }
             }
             updateProgress();
         }
 
         function flipCard() {
             flashcardEl.classList.toggle('flipped');
-        }
-
-        function nextCard() {
-            if (filteredFlashcards.length === 0) return;
-            flashcardEl.classList.remove('flipped');
-            setTimeout(() => {
-                currentCard = (currentCard + 1) % filteredFlashcards.length;
-                sortFlashcards();
-                updateCard();
-            }, 300);
-        }
-
-        function prevCard() {
-            if (filteredFlashcards.length === 0) return;
-            flashcardEl.classList.remove('flipped');
-            setTimeout(() => {
-                currentCard = (currentCard - 1 + filteredFlashcards.length) % filteredFlashcards.length;
-                updateCard();
-            }, 300);
         }
 
         function openAddModal() {
@@ -107,25 +96,51 @@
         }
 
         function saveCardFromModal() {
-            const newFront = document.getElementById('modal-front').value;
-            const newBack = document.getElementById('modal-back').value;
-            const newTheme = document.getElementById('modal-theme').value.trim();
+    const newFront = document.getElementById('modal-front').value;
+    const newBack = document.getElementById('modal-back').value;
+    const newTheme = document.getElementById('modal-theme').value.trim();
+    const fileInput = document.getElementById('modal-image');
+    let imageData = '';
 
-            if (newFront && newBack && newTheme) {
-                if (editIndex === null) {
-                    flashcards.push({ front: newFront, back: newBack, theme: newTheme, interval: 1, nextReview: Date.now(), protected: false });
-                } else {
-                    flashcards[editIndex] = { ...flashcards[editIndex], front: newFront, back: newBack, theme: newTheme };
-                }
-                saveFlashcards();
-                updateCardList();
-                updateThemeOptions();
-                changeTheme();
-                closeModal();
-            } else {
-                alert("Preencha todos os campos!");
-            }
+    if (fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imageData = e.target.result; // Base64 da imagem
+            saveCard(newFront, newBack, newTheme, imageData);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    } else {
+        saveCard(newFront, newBack, newTheme, imageData);
+    }
+}
+
+function saveCard(front, back, theme, image) {
+    if (front && (back || image) && theme) {
+        const card = {
+            front,
+            back: back || '', // Pode ser vazio se houver imagem
+            image: image || '', // Armazena a imagem em base64 ou URL
+            theme,
+            interval: 1,
+            nextReview: Date.now(),
+            protected: false
+        };
+        if (editIndex === null) {
+            flashcards.push(card);
+        } else {
+            flashcards[editIndex] = { ...flashcards[editIndex], ...card };
         }
+        saveFlashcards();
+        updateCardList();
+        updateThemeOptions();
+        changeTheme();
+        closeModal();
+        document.getElementById('modal-image').value = ''; // Limpa o input
+        document.getElementById('image-preview').style.display = 'none';
+    } else {
+        alert("Preencha a frente e o tema, e pelo menos o verso ou uma imagem!");
+    }
+}
 
         function deleteCard(index) {
             if (flashcards[index].protected) {
@@ -298,25 +313,88 @@
             localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
         }
 
+        let currentTextareaId = null;
+
+function insertFormula(textareaId) {
+    currentTextareaId = textareaId;
+    document.getElementById('formula-modal').style.display = 'flex';
+    document.getElementById('formula-input').value = '';
+    updateFormulaPreview();
+}
+
+function closeFormulaModal() {
+    document.getElementById('formula-modal').style.display = 'none';
+}
+
+function saveFormula() {
+    const formula = document.getElementById('formula-input').value;
+    if (formula) {
+        const textarea = document.getElementById(currentTextareaId);
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const formattedFormula = `\( ${formula} \)`;
+        textarea.value = text.substring(0, start) + formattedFormula + text.substring(end);
+    }
+    closeFormulaModal();
+}
+
+function updateFormulaPreview() {
+    const input = document.getElementById('formula-input');
+    const preview = document.getElementById('formula-preview');
+    preview.innerHTML = `\( ${input.value || 'Pré-visualização'} \}`;
+    if (typeof MathJax !== 'undefined') {
+        MathJax.typesetPromise([preview]).catch(err => console.error('Erro ao renderizar MathJax:', err));
+    }
+}
+
+// Adicionar evento para pré-visualização em tempo real
+document.getElementById('formula-input')?.addEventListener('input', updateFormulaPreview);
+
+function previewImage() {
+    const fileInput = document.getElementById('modal-image');
+    const preview = document.getElementById('image-preview');
+    const file = fileInput.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '';
+        preview.style.display = 'none';
+    }
+}
+
+        function initializeFlashcards() {
+            flashcards = JSON.parse(localStorage.getItem('flashcards')) || [...defaultFlashcards];
+            filteredFlashcards = [...flashcards];
+            sortFlashcards();
+            updateCardList();
+            updateThemeOptions();
+            updateCard();
+        }
         // Inicialização após o DOM estar carregado
         document.addEventListener('DOMContentLoaded', () => {
             flashcardEl = document.getElementById('flashcard');
-            // Removemos front e back antigos
             themeSelect = document.getElementById('theme-select');
             statsEl = document.getElementById('stats');
             progressEl = document.getElementById('progress');
             modal = document.getElementById('modal');
             searchInput = document.getElementById('search');
         
+            // Adicionar evento de clique para virar o cartão
+            flashcardEl.addEventListener('click', flipCard);
+        
             console.log('Iniciando app...');
+            initializeFlashcards(); // Chama a função de inicialização
             console.log('Flashcards carregados:', flashcards);
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.remove('light');
                 document.body.classList.add('dark');
             }
-            updateThemeOptions();
-            filteredFlashcards = [...flashcards];
-            sortFlashcards();
-            updateCardList();
-            showTab('home'); // Exibe a aba Home por padrão
+            showTab('home');
         });

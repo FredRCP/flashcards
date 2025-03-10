@@ -6,6 +6,7 @@
     <title>Flashcards App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body class="light">
     <nav>
@@ -28,7 +29,7 @@
             </div>
         </div>
     
-        <!-- Aba Estudo (removendo stats) -->
+        <!-- Aba Estudo -->
         <div id="study" class="tab-content">
             <div class="theme-selector">
                 <select id="theme-select" onchange="changeTheme()">
@@ -52,14 +53,13 @@
                 </div>
             </div>
             <div class="buttons">
-                <button onclick="prevCard()"><i class="fas fa-arrow-left"></i> Anterior</button>
-                <button onclick="flipCard()"><i class="fas fa-sync-alt"></i> Virar</button>
-                <button onclick="nextCard()">Próximo <i class="fas fa-arrow-right"></i></button>
+                <button onclick="prevCard()" title="Anterior"><i class="fas fa-arrow-left"></i></button>
+                <button onclick="nextCard()" title="Próximo"><i class="fas fa-arrow-right"></i></button>
             </div>
             <div class="difficulty-buttons">
-                <button onclick="rateDifficulty(1)"><i class="fas fa-exclamation"></i> Difícil</button>
-                <button onclick="rateDifficulty(2)"><i class="fas fa-equals"></i> Médio</button>
-                <button onclick="rateDifficulty(3)"><i class="fas fa-check"></i> Fácil</button>
+                <button onclick="rateDifficulty(1)" title="Difícil"><i class="fas fa-exclamation"></i></button>
+                <button onclick="rateDifficulty(2)" title="Médio"><i class="fas fa-equals"></i></button>
+                <button onclick="rateDifficulty(3)" title="Fácil"><i class="fas fa-check"></i></button>
             </div>
         </div>
     
@@ -67,9 +67,20 @@
         <div id="stats" class="tab-content">
             <div class="stats-container">
                 <h2>Estatísticas</h2>
-                <div id="general-stats"></div>
-                <div id="theme-stats"></div>
-                <div id="time-stats"></div>
+                <div class="stats-grid">
+                    <div class="stats-box">
+                        <h3>Geral</h3>
+                        <div id="general-stats"></div>
+                    </div>
+                    <div class="stats-box">
+                        <h3>Por Tema</h3>
+                        <div id="theme-stats"></div>
+                    </div>
+                    <div class="stats-box">
+                        <h3>Tempo de Estudo</h3>
+                        <div id="time-stats"></div>
+                    </div>
+                </div>
             </div>
         </div>
     
@@ -85,12 +96,27 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <h2 id="modal-title">Adicionar Cartão</h2>
-            <input type="text" id="modal-front" placeholder="Pergunta (frente)">
-            <input type="text" id="modal-back" placeholder="Resposta (verso)">
+            <textarea id="modal-front" placeholder="Pergunta (frente)" rows="3"></textarea>
+            <textarea id="modal-back" placeholder="Resposta (verso) - texto ou fórmula" rows="3"></textarea>
+            <button onclick="insertFormula('modal-back')" class="formula-btn"><i class="fas fa-square-root-alt"></i> Adicionar Fórmula</button>
+            <input type="file" id="modal-image" accept="image/jpeg" onchange="previewImage()">
+            <div id="image-preview" style="margin: 10px 0;"></div>
             <input type="text" id="modal-theme" placeholder="Tema (ex.: Nefrologia)">
             <div class="modal-buttons">
                 <button onclick="saveCardFromModal()"><i class="fas fa-save"></i> Salvar</button>
                 <button onclick="closeModal()"><i class="fas fa-times"></i> Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="formula-modal" class="modal">
+        <div class="modal-content">
+            <h2>Adicionar Fórmula</h2>
+            <textarea id="formula-input" placeholder="Digite a fórmula em LaTeX (ex.: GFR = \frac{a}{b})" rows="3"></textarea>
+            <div id="formula-preview" style="margin: 10px 0;"></div>
+            <div class="modal-buttons">
+                <button onclick="saveFormula()"><i class="fas fa-check"></i> Inserir</button>
+                <button onclick="closeFormulaModal()"><i class="fas fa-times"></i> Cancelar</button>
             </div>
         </div>
     </div>
