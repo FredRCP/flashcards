@@ -96,23 +96,48 @@
         }
 
         function saveCardFromModal() {
-    const newFront = document.getElementById('modal-front').value;
-    const newBack = document.getElementById('modal-back').value;
-    const newTheme = document.getElementById('modal-theme').value.trim();
-    const fileInput = document.getElementById('modal-image');
-    let imageData = '';
-
-    if (fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            imageData = e.target.result; // Base64 da imagem
-            saveCard(newFront, newBack, newTheme, imageData);
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-    } else {
-        saveCard(newFront, newBack, newTheme, imageData);
-    }
-}
+            const frontInput = document.getElementById('modal-front');
+            const backInput = document.getElementById('modal-back');
+            const themeInput = document.getElementById('modal-theme');
+            const fileInput = document.getElementById('modal-image');
+            let imageData = '';
+        
+            // Remove classes de erro anteriores
+            frontInput.classList.remove('error');
+            backInput.classList.remove('error');
+            themeInput.classList.remove('error');
+        
+            // Verifica campos obrigatórios
+            let hasError = false;
+            if (!frontInput.value.trim()) {
+                frontInput.classList.add('error');
+                hasError = true;
+            }
+            if (!backInput.value.trim() && !fileInput.files[0]) {
+                backInput.classList.add('error');
+                hasError = true;
+            }
+            if (!themeInput.value.trim()) {
+                themeInput.classList.add('error');
+                hasError = true;
+            }
+        
+            if (hasError) {
+                alert('Por favor, preencha a frente e o tema, e pelo menos o verso ou uma imagem!');
+                return;
+            }
+        
+            if (fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imageData = e.target.result;
+                    saveCard(frontInput.value, backInput.value, themeInput.value, imageData);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                saveCard(frontInput.value, backInput.value, themeInput.value, imageData);
+            }
+        }
 
 function saveCard(front, back, theme, image) {
     if (front && (back || image) && theme) {
@@ -295,6 +320,27 @@ function saveCard(front, back, theme, image) {
             progressEl.style.width = `${progress}%`;
         }
 
+        let studyInterval = null;
+
+        function startStudyTimer() {
+            if (!studyInterval) {
+                lastInteraction = Date.now();
+                studyInterval = setInterval(() => {
+                    const now = Date.now();
+                    studyTime += Math.floor((now - lastInteraction) / 1000);
+                    lastInteraction = now;
+                    localStorage.setItem('studyTime', studyTime);
+                }, 1000); // Atualiza a cada segundo
+            }
+        }
+
+        function stopStudyTimer() {
+            if (studyInterval) {
+                clearInterval(studyInterval);
+                studyInterval = null;
+            }
+        }
+
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
@@ -302,8 +348,12 @@ function saveCard(front, back, theme, image) {
             document.querySelector(`nav a[onclick="showTab('${tabId}'); return false;"]`).classList.add('active');
             if (tabId === 'study') {
                 updateCard();
-            } else if (tabId === 'stats') {
-                updateStats(); // Atualiza apenas quando a aba Estatísticas é aberta
+                startStudyTimer();
+            } else {
+                stopStudyTimer();
+                if (tabId === 'stats') {
+                    updateStats();
+                }
             }
         }
 

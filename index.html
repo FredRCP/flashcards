@@ -7,9 +7,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="/assets/img/icon.png" type="image/x-icon">
 </head>
 <body class="light">
     <nav>
+        <img class="logo" src="/assets/img/logo.png" alt="">
         <div>
             <a href="#" class="active" onclick="showTab('home'); return false;">Home</a>
             <a href="#" onclick="showTab('study'); return false;">Estudo</a>
@@ -25,6 +27,7 @@
             <div class="welcome-container">
                 <h1>Bem-vindo ao Flashcards App!</h1>
                 <p>Aprenda de forma prática e divertida com nossos flashcards interativos. Escolha um tema, estude e gerencie seus cartões!</p>
+                <img src="./assets/img/home.webp" alt="Ilustração de estudo" style="max-width: 300px; margin: 20px 0;">                <p><em>"Aprender é o primeiro passo para conquistar!"</em></p>
                 <button onclick="showTab('study')"><i class="fas fa-book"></i> Começar a Estudar</button>
             </div>
         </div>
@@ -53,7 +56,7 @@
                 </div>
             </div>
             <div class="buttons">
-                <button id="prox" onclick="prevCard()" title="Anterior"><i class="fas fa-arrow-left"></i></button>
+                <button id="prev" onclick="prevCard()" title="Anterior"><i class="fas fa-arrow-left"></i></button>
                 <button id="prox" onclick="nextCard()" title="Próximo"><i class="fas fa-arrow-right"></i></button>
             </div>
             <div class="difficulty-buttons">
@@ -70,15 +73,15 @@
                 <div class="stats-grid">
                     <div class="stats-box">
                         <h3>Geral</h3>
-                        <div id="general-stats"></div>
+                        <div id="general-stats">Nenhuma estatística disponível ainda.</div>
                     </div>
                     <div class="stats-box">
                         <h3>Por Tema</h3>
-                        <div id="theme-stats"></div>
+                        <div id="theme-stats">Comece a estudar para ver suas estatísticas por tema!</div>
                     </div>
                     <div class="stats-box">
                         <h3>Tempo de Estudo</h3>
-                        <div id="time-stats"></div>
+                        <div id="time-stats">Nenhum tempo registrado ainda.</div>
                     </div>
                 </div>
             </div>
@@ -99,7 +102,7 @@
             <textarea id="modal-front" placeholder="Pergunta (frente)" rows="3"></textarea>
             <textarea id="modal-back" placeholder="Resposta (verso) - texto ou fórmula" rows="3"></textarea>
             <button onclick="insertFormula('modal-back')" class="formula-btn"><i class="fas fa-square-root-alt"></i> Adicionar Fórmula</button>
-            <input type="file" id="modal-image" accept="image/jpeg" onchange="previewImage()">
+            <input type="file" id="modal-image" accept="image/*" onchange="previewImage()">
             <div id="image-preview" style="margin: 10px 0;"></div>
             <input type="text" id="modal-theme" placeholder="Tema (ex.: Nefrologia)">
             <div class="modal-buttons">
@@ -121,7 +124,7 @@
         </div>
     </div>
 
-    <img class="logo" src="/assets/img/logo.png" alt="">
+    
     <script src="/assets/js/app.js"></script>
 </body>
 </html>

@@ -229,6 +229,10 @@
             font-size: 1rem;
         }
 
+        .error {
+            border: 2px solid red;
+        }
+
         .stats-container {
             max-width: 800px;
             width: 100%;
@@ -276,7 +280,7 @@
         }
         
         .stats-box div {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #555;
         }
         
@@ -672,8 +676,7 @@
 
         .logo{
             position: fixed;
-            right: 1rem;
-            left: 1rem;
+            right: 0rem;
             bottom: 0rem;
             width: 10rem;
             transition: all 500ms ease-in-out;
@@ -683,6 +686,14 @@
           .logo:hover{
             transform: scale(1.2);
           }
+
+        @media (max-width: 1600px){
+            #study .buttons, #study .difficulty-buttons {
+                gap: 15px;
+                margin-bottom: 10px;   
+            }
+
+        }  
 
         @media (max-width: 768px) {
             
@@ -724,8 +735,9 @@
                 font-size: 0.9rem;
             }
 
-            #prox{
-                margin-top: -3rem;
+            #study .buttons, #study .difficulty-buttons {
+                gap: 15px;
+                margin-bottom: 10px;   
             }
 
             .theme-selector {
