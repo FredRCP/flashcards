@@ -724,6 +724,10 @@
                 font-size: 0.9rem;
             }
 
+            #prox{
+                margin-top: -3rem;
+            }
+
             .theme-selector {
                 flex-direction: column;
                 align-items: stretch;
