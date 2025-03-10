@@ -87,7 +87,7 @@
 
         .tab-content {
             display: none;
-            max-width: 450px;
+            max-width: 600px;
             width: 100%;
         }
 
@@ -149,12 +149,6 @@
             border-color: #666;
         }
 
-        .stats {
-            margin-bottom: 15px;
-            font-size: 0.9rem;
-            text-align: center;
-            color: #555;
-        }
 
         body.dark .stats {
             color: #ccc;
@@ -182,7 +176,7 @@
         .flashcard-container {
             perspective: 1000px;
             width: 100%;
-            height: 250px;
+            height: 360px;
             position: relative;
             margin-bottom: 20px;
         }
@@ -245,7 +239,7 @@
         
         .stats-container h2 {
             font-size: 1.5rem;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
             color: #007bff;
         }
         
@@ -255,7 +249,7 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
         }
         
@@ -676,10 +670,24 @@
             background-color: #218838;
         }
 
+        .logo{
+            position: fixed;
+            right: 1rem;
+            left: 1rem;
+            bottom: 0rem;
+            width: 10rem;
+            transition: all 500ms ease-in-out;
+            margin: auto;
+          }
+          
+          .logo:hover{
+            transform: scale(1.2);
+          }
+
         @media (max-width: 768px) {
             
             nav {
-                padding: 10px;
+                padding: 5px;
                 flex-direction: column;
                 align-items: center; /* Centraliza tudo */
             }
@@ -689,22 +697,22 @@
                 flex-direction: row; /* Mantém os links em linha */
                 flex-wrap: wrap; /* Permite quebra de linha */
                 justify-content: center; /* Centraliza os links */
-                gap: 8px; /* Espaço consistente */
+                gap: 5px; /* Espaço consistente */
             }
         
             nav a {
                 font-size: 0.9rem;
-                padding: 6px 10px;
+                padding: 6px 15px;
             }
         
             nav #theme-toggle {
-                margin-top: 10px;
+                margin-top: 2px;
                 width: auto; /* Botão com largura automática */
                 padding: 6px 15px; /* Padding ajustado */
             }
             
             .flashcard {
-                height: 200px;
+                height: 280px;
             }
 
             .front, .back {
@@ -724,4 +732,9 @@
             select, .search-input {
                 width: 100%;
             }
+
+            .logo{
+                bottom: -0.5rem;
+                width: 8rem;
+              }
         }

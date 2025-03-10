@@ -315,59 +315,59 @@ function saveCard(front, back, theme, image) {
 
         let currentTextareaId = null;
 
-function insertFormula(textareaId) {
-    currentTextareaId = textareaId;
-    document.getElementById('formula-modal').style.display = 'flex';
-    document.getElementById('formula-input').value = '';
-    updateFormulaPreview();
-}
+        function insertFormula(textareaId) {
+            currentTextareaId = textareaId;
+            document.getElementById('formula-modal').style.display = 'flex';
+            document.getElementById('formula-input').value = '';
+            updateFormulaPreview();
+        }
 
-function closeFormulaModal() {
-    document.getElementById('formula-modal').style.display = 'none';
-}
+        function closeFormulaModal() {
+            document.getElementById('formula-modal').style.display = 'none';
+        }
 
-function saveFormula() {
-    const formula = document.getElementById('formula-input').value;
-    if (formula) {
-        const textarea = document.getElementById(currentTextareaId);
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value;
-        const formattedFormula = `\( ${formula} \)`;
-        textarea.value = text.substring(0, start) + formattedFormula + text.substring(end);
-    }
-    closeFormulaModal();
-}
+        function saveFormula() {
+            const formula = document.getElementById('formula-input').value;
+            if (formula) {
+                const textarea = document.getElementById(currentTextareaId);
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const text = textarea.value;
+                const formattedFormula = `\( ${formula} \)`;
+                textarea.value = text.substring(0, start) + formattedFormula + text.substring(end);
+            }
+            closeFormulaModal();
+        }
 
-function updateFormulaPreview() {
-    const input = document.getElementById('formula-input');
-    const preview = document.getElementById('formula-preview');
-    preview.innerHTML = `\( ${input.value || 'Pré-visualização'} \}`;
-    if (typeof MathJax !== 'undefined') {
-        MathJax.typesetPromise([preview]).catch(err => console.error('Erro ao renderizar MathJax:', err));
-    }
-}
+        function updateFormulaPreview() {
+            const input = document.getElementById('formula-input');
+            const preview = document.getElementById('formula-preview');
+            preview.innerHTML = `\( ${input.value || 'Pré-visualização'} \}`;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([preview]).catch(err => console.error('Erro ao renderizar MathJax:', err));
+            }
+        }
 
-// Adicionar evento para pré-visualização em tempo real
-document.getElementById('formula-input')?.addEventListener('input', updateFormulaPreview);
+        // Adicionar evento para pré-visualização em tempo real
+        document.getElementById('formula-input')?.addEventListener('input', updateFormulaPreview);
 
-function previewImage() {
-    const fileInput = document.getElementById('modal-image');
-    const preview = document.getElementById('image-preview');
-    const file = fileInput.files[0];
+        function previewImage() {
+            const fileInput = document.getElementById('modal-image');
+            const preview = document.getElementById('image-preview');
+            const file = fileInput.files[0];
 
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    } else {
-        preview.innerHTML = '';
-        preview.style.display = 'none';
-    }
-}
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+                preview.style.display = 'none';
+            }
+        }
 
         function initializeFlashcards() {
             flashcards = JSON.parse(localStorage.getItem('flashcards')) || [...defaultFlashcards];
