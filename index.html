@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aplicativo de flashcards interativos para estudo em temas como Geografia, História, Programação e Nefrologia.">
+    <meta name="keywords" content="flashcards, estudo, aprendizado, revisão espaçada">
+    <meta name="author" content="Seu Nome ou xAI">
     <title>Flashcards App</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/style.css">
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="shortcut icon" href="/assets/img/icon.png" type="image/x-icon">
 </head>
 <body class="light">
-    <nav>
+    <nav role="navigation" aria-label="Menu principal">
         <img class="logo" src="/assets/img/logo.png" alt="">
         <div>
             <a href="#" class="active" onclick="showTab('home'); return false;">Home</a>
@@ -23,17 +27,17 @@
 
     <main>
         <!-- Aba Home (sem alterações) -->
-        <div id="home" class="tab-content active">
+        <section id="home" class="tab-content active" aria-labelledby="home-tab">
             <div class="welcome-container">
                 <h1>Bem-vindo ao Flashcards App!</h1>
                 <p>Aprenda de forma prática e divertida com nossos flashcards interativos. Escolha um tema, estude e gerencie seus cartões!</p>
                 <img src="./assets/img/home.webp" alt="Ilustração de estudo" style="max-width: 300px; margin: 20px 0;">                <p><em>"Aprender é o primeiro passo para conquistar!"</em></p>
                 <button onclick="showTab('study')"><i class="fas fa-book"></i> Começar a Estudar</button>
             </div>
-        </div>
+        </section>
     
         <!-- Aba Estudo -->
-        <div id="study" class="tab-content">
+        <section id="study" class="tab-content" aria-labelledby="study-tab">
             <div class="theme-selector">
                 <select id="theme-select" onchange="changeTheme()">
                     <option value="all">Todos os Temas</option>
@@ -56,18 +60,18 @@
                 </div>
             </div>
             <div class="buttons">
-                <button id="prev" onclick="prevCard()" title="Anterior"><i class="fas fa-arrow-left"></i></button>
-                <button id="prox" onclick="nextCard()" title="Próximo"><i class="fas fa-arrow-right"></i></button>
+                <button id="prev" onclick="prevCard()" title="Anterior" aria-label="Cartão anterior"><i class="fas fa-arrow-left"></i></button>
+                <button id="prox" onclick="nextCard()" title="Próximo" aria-label="Próximo cartão"><i class="fas fa-arrow-right"></i></button>
             </div>
             <div class="difficulty-buttons">
                 <button onclick="rateDifficulty(1)" title="Difícil"><i class="fas fa-exclamation"></i></button>
                 <button onclick="rateDifficulty(2)" title="Médio"><i class="fas fa-equals"></i></button>
                 <button onclick="rateDifficulty(3)" title="Fácil"><i class="fas fa-check"></i></button>
             </div>
-        </div>
+        </section>
     
         <!-- Nova Aba Estatísticas -->
-        <div id="stats" class="tab-content">
+        <section id="stats" class="tab-content" aria-labelledby="stats-tab">
             <div class="stats-container">
                 <h2>Estatísticas</h2>
                 <div class="stats-grid">
@@ -85,26 +89,33 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     
         <!-- Aba Gerenciar (sem alterações) -->
-        <div id="manage" class="tab-content">
+        <section id="manage" class="tab-content" aria-labelledby="manage-tab">
             <div class="add-card-form">
+                <div class="manage-actions">
+                    <button class="action-btn" onclick="exportFlashcards()" title="Exportar Flashcards"><i class="fas fa-download"></i></button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importFlashcards(event)">
+                    <button class="action-btn" onclick="document.getElementById('import-file').click()" title="Importar Flashcards"><i class="fas fa-upload"></i></button>
+                </div>
                 <button onclick="openAddModal()"><i class="fas fa-plus"></i> Adicionar Novo Cartão</button>
+                <button id="toggle-card-list" onclick="toggleCardList()"><i class="fas fa-list"></i> Ver Lista de Cartões</button>
             </div>
-            <div class="card-list" id="card-list"></div>
-        </div>
+            <div class="card-list" id="card-list"></div> <!-- Removido style="display: none;" -->
+        </section>
     </main>
 
     <div id="modal" class="modal">
         <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()" aria-label="Fechar modal"><i class="fas fa-times"></i></button>
             <h2 id="modal-title">Adicionar Cartão</h2>
-            <textarea id="modal-front" placeholder="Pergunta (frente)" rows="3"></textarea>
+            <textarea id="modal-front" placeholder="Pergunta (frente)" rows="3" required></textarea>
             <textarea id="modal-back" placeholder="Resposta (verso) - texto ou fórmula" rows="3"></textarea>
             <button onclick="insertFormula('modal-back')" class="formula-btn"><i class="fas fa-square-root-alt"></i> Adicionar Fórmula</button>
             <input type="file" id="modal-image" accept="image/*" onchange="previewImage()">
             <div id="image-preview" style="margin: 10px 0;"></div>
-            <input type="text" id="modal-theme" placeholder="Tema (ex.: Nefrologia)">
+            <input type="text" id="modal-theme" placeholder="Tema (ex.: Nefrologia)" required>
             <div class="modal-buttons">
                 <button onclick="saveCardFromModal()"><i class="fas fa-save"></i> Salvar</button>
                 <button onclick="closeModal()"><i class="fas fa-times"></i> Cancelar</button>
@@ -125,6 +136,6 @@
     </div>
 
     
-    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/app.js" defer></script>
 </body>
 </html>
