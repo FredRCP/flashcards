@@ -194,7 +194,8 @@ body.dark .progress {
 .flashcard-container {
     perspective: 1000px;
     width: 100%;
-    height: 360px;
+    max-width: 720px;
+    height: 400px; /* Aumentado um pouco */
     position: relative;
     margin-bottom: 20px;
 }
@@ -205,10 +206,45 @@ body.dark .progress {
     position: absolute;
     transform-style: preserve-3d;
     transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    border-radius: 15px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background: #fff;
 }
+
+body.dark .flashcard {
+    background: #555;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+    font-size: 1.4rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef); /* Gradiente sutil */
+}
+
+body.dark .front {
+    background: linear-gradient(135deg, #555, #444);
+}
+
+body.dark .back {
+    background: linear-gradient(135deg, #666, #555);
+}
+
+.theme-Geografia .front { background: linear-gradient(135deg, #cce5ff, #a3d4ff); }
+.theme-História .front { background: linear-gradient(135deg, #fff3cd, #ffeaa7); }
+.theme-Programação .front { background: linear-gradient(135deg, #d4edda, #b7e4c7); }
+.theme-Nefrologia .front { background: linear-gradient(135deg, #f8d7da, #f5c6cb); }
+.back { background: linear-gradient(135deg, #e0f7fa, #b2ebf2); }
 
 .flashcard.flipped {
     transform: rotateY(180deg);
@@ -709,43 +745,63 @@ body.dark .modal-content input {
 
 .welcome-container {
     display: flex;
-    flex-wrap: wrap;
-    text-align: center;
+    flex-direction: column; /* Alterado para coluna para melhor controle */
+    align-items: center;
     justify-content: center;
+    text-align: center;
     padding: 40px 20px;
-    max-width: 600px;
+    max-width: 700px;
     width: 100%;
     margin: 0 auto;
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(255, 255, 255, 0.5)); /* Fundo gradiente sutil */
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .welcome-container {
+    background: linear-gradient(135deg, rgba(102, 176, 255, 0.1), rgba(51, 51, 51, 0.5));
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .welcome-container h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    margin-bottom: 25px;
     color: #007bff;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .welcome-container p {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-    color: #555;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    color: #444;
+    line-height: 1.5;
 }
 
-body.dark .welcome-container h1 {
-    color: #66b0ff;
-}
-
-body.dark .welcome-container p {
-    color: #ccc;
+.welcome-container p em {
+    font-style: italic;
+    color: #666;
 }
 
 .welcome-container button {
-    padding: 15px 30px;
+    padding: 15px 40px;
     font-size: 1.2rem;
     background-color: #28a745;
+    border-radius: 25px; /* Bordas mais arredondadas */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
 .welcome-container button:hover {
     background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin: 20px 0;
 }
 
 .logo {

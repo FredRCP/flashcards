@@ -13,8 +13,33 @@ const defaultFlashcards = [
     { front: "Qual é o maior continente?", back: "Ásia", theme: "Geografia", interval: 1, nextReview: Date.now(), protected: true },
     { front: "Quem descobriu o Brasil?", back: "Pedro Álvares Cabral", theme: "História", interval: 1, nextReview: Date.now(), protected: true },
     { front: "O que faz display: flex?", back: "Ativa o Flexbox", theme: "Programação", interval: 1, nextReview: Date.now(), protected: true },
-    { front: "Qual é a função principal dos rins?", back: "Filtrar o sangue", theme: "Nefrologia", interval: 1, nextReview: Date.now(), protected: true }
+    { front: "Qual é a função principal dos rins?", back: "Filtrar o sangue", theme: "Nefrologia", interval: 1, nextReview: Date.now(), protected: true },
+    
+    // Doenças Renais Crônicas (DRC)
+    { front: "O que é a Doença Renal Crônica (DRC)?", back: "É a perda progressiva e irreversível da função renal.", theme: "DRC", interval: 1, nextReview: Date.now(), protected: true },
+    { front: "Quais são os principais fatores de risco para DRC?", back: "Diabetes, hipertensão, idade avançada, história familiar e uso de nefrotóxicos.", theme: "DRC", interval: 1, nextReview: Date.now(), protected: true },
+
+    // Insuficiência Renal Aguda (IRA)
+    { front: "O que caracteriza a Insuficiência Renal Aguda (IRA)?", back: "É a redução abrupta da função renal, resultando em retenção de ureia e creatinina.", theme: "IRA", interval: 1, nextReview: Date.now(), protected: true },
+    { front: "Quais são as principais causas de IRA?", back: "Hipovolemia, sepse, nefrotoxinas e obstrução urinária.", theme: "IRA", interval: 1, nextReview: Date.now(), protected: true },
+
+    // Distúrbios Hidroeletrolíticos (DHE)
+    { front: "Qual é a principal causa de hiponatremia?", back: "Síndrome da secreção inapropriada do ADH (SIADH).", theme: "DHE", interval: 1, nextReview: Date.now(), protected: true },
+    { front: "Quais são os sinais clínicos da hipercalemia?", back: "Arritmias cardíacas, fraqueza muscular e parestesias.", theme: "DHE", interval: 1, nextReview: Date.now(), protected: true },
+
+    // Anemia na Doença Renal
+    { front: "Por que pacientes com DRC desenvolvem anemia?", back: "Devido à redução da produção de eritropoetina pelos rins.", theme: "Anemia", interval: 1, nextReview: Date.now(), protected: true },
+    { front: "Qual é o tratamento principal para anemia na DRC?", back: "Suplementação de eritropoetina e ferro.", theme: "Anemia", interval: 1, nextReview: Date.now(), protected: true },
+
+    // Doença Mineral Óssea (DMO)
+    { front: "O que é a Doença Mineral Óssea (DMO) na DRC?", back: "Alteração no metabolismo ósseo devido à disfunção renal.", theme: "DMO", interval: 1, nextReview: Date.now(), protected: true },
+    { front: "Quais hormônios estão envolvidos na DMO na DRC?", back: "PTH, calcitriol e FGF-23.", theme: "DMO", interval: 1, nextReview: Date.now(), protected: true },
+
+    // Terapia Renal Substitutiva (TRS)
+    { front: "Quais são os tipos de Terapia Renal Substitutiva (TRS)?", back: "Hemodiálise, diálise peritoneal e transplante renal.", theme: "TRS", interval: 1, nextReview: Date.now(), protected: true },
+    { front: "Quando a TRS é indicada para pacientes com DRC?", back: "Quando a taxa de filtração glomerular (TFG) está abaixo de 10-15 mL/min/1,73m².", theme: "TRS", interval: 1, nextReview: Date.now(), protected: true }
 ];
+
 
 let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [...defaultFlashcards];
 let filteredFlashcards = [...flashcards];
@@ -446,18 +471,18 @@ function stopStudyTimer() {
 
 function showTab(tabId) {
     const currentActive = document.querySelector('.tab-content.active');
-    if (currentActive) {
+    if (currentActive && currentActive.id !== tabId) { // Só esconde se não for a aba atual
         currentActive.classList.remove('active');
         setTimeout(() => {
-            currentActive.style.display = 'none'; // Esconde após a transição
-        }, 300); // Tempo igual à duração da transição no CSS
+            currentActive.style.display = 'none';
+        }, 300);
     }
 
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     
     const newTab = document.getElementById(tabId);
-    newTab.style.display = 'block'; // Mostra imediatamente
-    setTimeout(() => newTab.classList.add('active'), 10); // Adiciona 'active' com delay mínimo para disparar a transição
+    newTab.style.display = 'block';
+    setTimeout(() => newTab.classList.add('active'), 10);
     
     document.querySelector(`nav a[onclick="showTab('${tabId}'); return false;"]`).classList.add('active');
     
@@ -631,5 +656,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('light');
         document.body.classList.add('dark');
     }
-    showTab('home');
+    // Não chama showTab('home') aqui, já que o HTML define o estado inicial
+    const initialTab = document.querySelector('.tab-content.active');
+    if (initialTab) {
+        initialTab.style.display = 'block'; // Garante que a aba inicial esteja visível
+    }
 });
