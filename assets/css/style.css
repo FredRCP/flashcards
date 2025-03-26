@@ -753,7 +753,6 @@ body.dark .modal-content input {
     max-width: 700px;
     width: 100%;
     margin: 0 auto;
-    background: linear-gradient(135deg, rgba(0, 123, 255, 0.1), rgba(255, 255, 255, 0.5)); /* Fundo gradiente sutil */
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -786,14 +785,14 @@ body.dark .welcome-container {
     padding: 15px 40px;
     font-size: 1.2rem;
     background-color: #28a745;
-    border-radius: 25px; /* Bordas mais arredondadas */
+    border-radius: 15px; /* Bordas mais arredondadas */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
 
 .welcome-container button:hover {
     background-color: #218838;
-    transform: translateY(-2px);
+    transform: scale(1.02);
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -948,6 +947,10 @@ body.dark .welcome-container {
     .add-card-form {
         gap: 10px;
         margin-bottom: 15px;
+    }
+
+    #manage {
+        padding-top: 25px; /* Ajuste o valor conforme necessário */
     }
     
     #manage button {
