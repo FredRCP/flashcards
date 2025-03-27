@@ -1,17 +1,35 @@
 document.addEventListener('keydown', (e) => {
-    if (modal.style.display === 'flex') {
-        if (e.key === 'Escape') closeModal();
+    // Prevenir comportamento padrão apenas quando necessário
+    if (modal.style.display === 'flex' && e.key === 'Escape') {
+        closeModal();
+        e.preventDefault(); // Impede propagação apenas para Escape no modal
         return;
     }
-    if (instructionsModal.style.display === 'flex') { // Verifica se o modal está visível
-        if (e.key === 'Escape') closeInstructionsModal();
+    if (instructionsModal.style.display === 'flex' && e.key === 'Escape') {
+        closeInstructionsModal();
+        e.preventDefault(); // Impede propagação apenas para Escape no modal de instruções
         return;
     }
-    if (e.key === 'ArrowLeft') prevCard();
-    if (e.key === 'ArrowRight') nextCard();
-    if (e.key === '1') rateDifficulty(1);
-    if (e.key === '2') rateDifficulty(2);
-    if (e.key === '3') rateDifficulty(3);
+    if (e.key === 'ArrowLeft') {
+        prevCard();
+        e.preventDefault();
+    }
+    if (e.key === 'ArrowRight') {
+        nextCard();
+        e.preventDefault();
+    }
+    if (e.key === '1') {
+        rateDifficulty(1);
+        e.preventDefault();
+    }
+    if (e.key === '2') {
+        rateDifficulty(2);
+        e.preventDefault();
+    }
+    if (e.key === '3') {
+        rateDifficulty(3);
+        e.preventDefault();
+    }
 });
 
 // Declarações globais
@@ -115,7 +133,9 @@ function updateCard() {
         flashcardEl.classList.remove('flipped');
 
         if (typeof MathJax !== 'undefined' && !card.image) {
-            MathJax.typesetPromise([backContent]).catch(err => {
+            MathJax.typesetPromise([backContent]).then(() => {
+                // Sucesso na renderização
+            }).catch(err => {
                 console.error('Erro ao renderizar MathJax:', err);
                 backContent.textContent += " (Erro na fórmula)";
             });
@@ -658,21 +678,21 @@ function toggleCardList() {
     }
 }
 
-// Função para abrir o modal de instruções
 function openInstructionsModal() {
-    instructionsModal.style.display = 'flex'; // Define explicitamente como visível
-    setTimeout(() => instructionsModal.classList.add('visible'), 10); // Adiciona a classe após um pequeno delay para transição
+    instructionsModal.style.display = 'flex';
+    requestAnimationFrame(() => instructionsModal.classList.add('visible')); // Substitui setTimeout por RAF
 }
 
 // Função para fechar o modal de instruções
 function closeInstructionsModal() {
     instructionsModal.classList.remove('visible');
-    setTimeout(() => instructionsModal.style.display = 'none', 200); // Apenas esconde após a transição
-    localStorage.setItem('instructionsShown', 'true'); // Marca como exibido
+    instructionsModal.addEventListener('transitionend', () => {
+        instructionsModal.style.display = 'none';
+    }, { once: true }); // Usa transitionend em vez de setTimeout
+    localStorage.setItem('instructionsShown', 'true');
 }
 
 // Inicialização
-// Inicialização (ajustada para capturar o modal e mostrar na primeira vez)
 document.addEventListener('DOMContentLoaded', () => {
     flashcardEl = document.getElementById('flashcard');
     themeSelect = document.getElementById('theme-select');

@@ -1082,7 +1082,7 @@ body.dark .welcome-container {
     }
 
     #manage {
-        padding-top: 25px; /* Ajuste o valor conforme necessário */
+        padding-top: 25px;
     }
     
     #manage button {
@@ -1331,13 +1331,22 @@ body.dark .welcome-container {
 
     nav a {
         font-size: 0.9rem;
-        padding: 6px 15px;
+        padding: 6px 10px;
     }
 
     nav #theme-toggle {
-        margin-top: 2px;
+        margin-top: 1px;
         width: auto;
-        padding: 6px 15px;
+        padding: 4px 12px;
+        font-size: 0.9rem;
+    }
+
+    .tab-content{
+        padding-top: 30px;
+    }
+
+    #manage{
+        padding-top: 40px;
     }
 
     .flashcard {
@@ -1346,6 +1355,10 @@ body.dark .welcome-container {
 
     .front, .back {
         font-size: 1.1rem;
+    }
+
+    #instructions-modal .instructions {
+        font-size: 0.9rem;
     }
 
     button {
