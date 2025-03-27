@@ -85,6 +85,18 @@ nav a.active {
     background-color: #0056b3;
 }
 
+nav a#help-tab {
+    background-color: #17a2b8; /* Cor diferente para destacar */
+}
+
+nav a#help-tab:hover {
+    background-color: #138496;
+}
+
+nav a#help-tab.active {
+    background-color: #138496; /* Mantém o destaque, mas não será usado como aba ativa */
+}
+
 nav #theme-toggle {
     background-color: #ffc107;
     padding: 8px 12px;
@@ -133,6 +145,113 @@ main {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
+}
+
+#instructions-modal {
+    display: flex;
+    visibility: hidden;
+    opacity: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#instructions-modal.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+#instructions-modal .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px; /* Um pouco mais largo que o modal padrão */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+body.dark #instructions-modal .modal-content {
+    background-color: #444;
+}
+
+#instructions-modal .modal-content h2 {
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+body.dark #instructions-modal .modal-content h2 {
+    color: #66b0ff;
+}
+
+#instructions-modal .instructions {
+    text-align: left;
+    font-size: 1rem;
+    color: #333;
+}
+
+body.dark #instructions-modal .instructions {
+    color: #f0f0f0;
+}
+
+#instructions-modal .instructions p {
+    margin-bottom: 10px;
+}
+
+#instructions-modal .instructions ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#instructions-modal .instructions li {
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+#instructions-modal .instructions li strong {
+    color: #333;
+}
+
+body.dark #instructions-modal .instructions li strong {
+    color: #f0f0f0;
+}
+
+#instructions-modal .instructions ul ul {
+    padding-left: 20px;
+    list-style: disc;
+}
+
+#instructions-modal .instructions kbd {
+    background-color: #ddd;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+body.dark #instructions-modal .instructions kbd {
+    background-color: #666;
+    color: #f0f0f0;
+}
+
+#instructions-modal .modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+#instructions-modal .modal-buttons button:first-child {
+    background-color: #28a745;
+}
+
+#instructions-modal .modal-buttons button:first-child:hover {
+    background-color: #218838;
 }
 
 select {
@@ -244,10 +363,17 @@ body.dark .back {
 .theme-História .front { background: linear-gradient(135deg, #fff3cd, #ffeaa7); }
 .theme-Programação .front { background: linear-gradient(135deg, #d4edda, #b7e4c7); }
 .theme-Nefrologia .front { background: linear-gradient(135deg, #f8d7da, #f5c6cb); }
+.theme-DRC .front { background: linear-gradient(135deg, #f8d7da, #f1b0b7); }
+.theme-IRA .front { background: linear-gradient(135deg, #ffd1cc, #ff9999); }
+body.dark .theme-DRC .front { background: linear-gradient(135deg, #6b3e46, #5a353c); }
 .back { background: linear-gradient(135deg, #e0f7fa, #b2ebf2); }
 
 .flashcard.flipped {
     transform: rotateY(180deg);
+}
+
+.flashcard {
+    will-change: transform;
 }
 
 .front, .back {
@@ -285,6 +411,12 @@ body.dark .back {
 
 .error {
     border: 2px solid red;
+}
+
+#stats-chart {
+    max-width: 100%;
+    height: 200px; /* Altura fixa para consistência */
+    margin-top: 10px;
 }
 
 .stats-container {

@@ -21,6 +21,7 @@
             <a href="#" onclick="showTab('study'); return false;">Estudo</a>
             <a href="#" onclick="showTab('manage'); return false;">Gerenciar</a>
             <a href="#" onclick="showTab('stats'); return false;">Estatísticas</a> <!-- Nova aba -->
+            <a href="#" onclick="openInstructionsModal(); return false;" aria-label="Ajuda" id="help-tab">Ajuda</a> <!-- Novo botão -->
         </div>
         <button id="theme-toggle" onclick="toggleTheme()"><i class="fas fa-adjust"></i> Mudar Tema</button>
     </nav>
@@ -80,7 +81,8 @@
                     </div>
                     <div class="stats-box">
                         <h3>Por Tema</h3>
-                        <div id="theme-stats">Comece a estudar para ver suas estatísticas por tema!</div>
+                        <div id="theme-stats">...</div>
+                        <canvas id="stats-chart"></canvas>
                     </div>
                     <div class="stats-box">
                         <h3>Tempo de Estudo</h3>
@@ -133,6 +135,33 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Instruções -->
+<div id="instructions-modal" class="modal">
+    <div class="modal-content">
+        <h2>Bem-vindo ao Flashcard App!</h2>
+        <div class="instructions">
+            <p>Aprenda e revise de forma inteligente com este aplicativo. Veja como usar:</p>
+            <ul>
+                <li><strong>Navegação:</strong> Use as abas no topo para explorar: "Estudo" para revisar cartões, "Gerenciar" para criar/editar, "Estatísticas" para ver seu progresso.</li>
+                <li><strong>Estudo:</strong> Clique no cartão para virá-lo. Use setas esquerda/direita ou botões para navegar.</li>
+                <li><strong>Classifique a Dificuldade do cartão após ver a resposta:</strong>
+                    <ul>
+                        <li><strong>1 (Difícil):</strong> Não lembrou ou errou? Use <kbd>1</kbd>. O cartão aparecerá novamente em breve.</li>
+                        <li><strong>2 (Médio):</strong> Lembrou com esforço? Use <kbd>2</kbd>. Intervalo para aparecer novamente aumenta um pouco.</li>
+                        <li><strong>3 (Fácil):</strong> Lembrou fácilmente? Use <kbd>3</kbd>. O cartão demorará mais para reaparecer.</li>
+                    </ul>
+                </li>
+                <li><strong>Atalhos:</strong> <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd> para classificar, <kbd>Esc</kbd> para fechar janelas.</li>
+                <li><strong>Dica:</strong> Adicione seus próprios cartões em "Gerenciar" e personalize seu aprendizado!</li>
+            </ul>
+        </div>
+        <div class="modal-buttons">
+            <button onclick="closeInstructionsModal(); showTab('study');"><i class="fas fa-book-open"></i> Começar</button>
+            <button onclick="closeInstructionsModal();"><i class="fas fa-times"></i> Fechar</button>
+        </div>
+    </div>
+</div>
 
     
     <script src="/assets/js/app.js" defer></script>

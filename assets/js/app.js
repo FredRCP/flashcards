@@ -1,5 +1,12 @@
 document.addEventListener('keydown', (e) => {
-    if (modal.style.display === 'flex') return;
+    if (modal.style.display === 'flex') {
+        if (e.key === 'Escape') closeModal();
+        return;
+    }
+    if (instructionsModal.style.display === 'flex') { // Verifica se o modal está visível
+        if (e.key === 'Escape') closeInstructionsModal();
+        return;
+    }
     if (e.key === 'ArrowLeft') prevCard();
     if (e.key === 'ArrowRight') nextCard();
     if (e.key === '1') rateDifficulty(1);
@@ -40,7 +47,6 @@ const defaultFlashcards = [
     { front: "Quando a TRS é indicada para pacientes com DRC?", back: "Quando a taxa de filtração glomerular (TFG) está abaixo de 10-15 mL/min/1,73m².", theme: "TRS", interval: 1, nextReview: Date.now(), protected: true }
 ];
 
-
 let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [...defaultFlashcards];
 let filteredFlashcards = [...flashcards];
 let currentCard = 0;
@@ -48,14 +54,19 @@ let currentTheme = "all";
 let editIndex = null;
 let studyTime = parseInt(localStorage.getItem('studyTime')) || 0;
 let lastInteraction = null;
-
-let flashcardEl, themeSelect, statsEl, progressEl, modal, searchInput;
+let flashcardEl, themeSelect, statsEl, progressEl, modal, searchInput, instructionsModal; // Adicione instructionsModal aqui
 
 const themeIcons = {
     "Geografia": "fa-globe",
     "História": "fa-landmark",
     "Programação": "fa-code",
     "Nefrologia": "fa-heartbeat",
+    "DRC": "fa-kidneys",
+    "IRA": "fa-exclamation-triangle",
+    "DHE": "fa-tint",
+    "Anemia": "fa-tint-slash",
+    "DMO": "fa-bone",
+    "TRS": "fa-procedures",
     "all": "fa-book"
 };
 
@@ -346,12 +357,18 @@ function searchFlashcards() {
     updateCard();
 }
 
+let chartInstance = null; // Declare isso no escopo global, fora da função
+
 function updateStats() {
     const generalStats = document.getElementById('general-stats');
     const themeStats = document.getElementById('theme-stats');
     const timeStats = document.getElementById('time-stats');
+    const chartCanvas = document.getElementById('stats-chart');
 
-    if (!generalStats || !themeStats || !timeStats) return;
+    if (!generalStats || !themeStats || !timeStats || !chartCanvas) {
+        console.error('Elementos de estatísticas não encontrados!');
+        return;
+    }
 
     // Estatísticas gerais
     const total = flashcards.length;
@@ -360,7 +377,7 @@ function updateStats() {
     const easy = flashcards.filter(c => c.interval > 4).length;
     generalStats.innerHTML = `Total: ${total} | Difícil: ${difficult} | Médio: ${medium} | Fácil: ${easy}`;
 
-    // Preparar dados por tema
+    // Dados por tema
     const themes = [...new Set(flashcards.map(card => card.theme))];
     let themeSummary = 'Progresso por tema:<br>';
     const themeData = {
@@ -395,50 +412,52 @@ function updateStats() {
     const seconds = studyTime % 60;
     timeStats.textContent = `Tempo de estudo: ${minutes}m ${seconds}s`;
 
-    // Criar gráfico
-    const existingCanvas = themeStats.querySelector('canvas');
-    if (existingCanvas) existingCanvas.remove(); // Remove gráfico antigo
-
-    const ctx = document.createElement('canvas');
-    themeStats.appendChild(ctx);
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: themeData.themes,
-            datasets: [
-                {
-                    label: 'Fácil',
-                    data: themeData.easy,
-                    backgroundColor: 'rgba(75, 192, 192, 0.7)', // Verde
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Médio',
-                    data: themeData.medium,
-                    backgroundColor: 'rgba(255, 206, 86, 0.7)', // Amarelo
-                    borderColor: 'rgba(255, 206, 86, 1)',
-                    borderWidth: 1
-                }, 
-                {
-                    label: 'Difícil',
-                    data: themeData.difficult,
-                    backgroundColor: 'rgba(255, 99, 132, 0.7)', // Vermelho
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
-                }               
-            ]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true, title: { display: true, text: 'Número de Cartões' } },
-                x: { title: { display: true, text: 'Temas' } }
+    // Gráfico reutilizável
+    if (!chartInstance) {
+        chartInstance = new Chart(chartCanvas, {
+            type: 'bar',
+            data: {
+                labels: themeData.themes,
+                datasets: [
+                    {
+                        label: 'Fácil',
+                        data: [],
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Médio',
+                        data: [],
+                        backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Difícil',
+                        data: [],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }
+                ]
             },
-            plugins: {
-                legend: { display: true, position: 'top' }
+            options: {
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: 'Número de Cartões' } },
+                    x: { title: { display: true, text: 'Temas' } }
+                },
+                plugins: {
+                    legend: { display: true, position: 'top' }
+                }
             }
-        }
-    });
+        });
+    }
+    chartInstance.data.labels = themeData.themes;
+    chartInstance.data.datasets[0].data = themeData.easy;
+    chartInstance.data.datasets[1].data = themeData.medium;
+    chartInstance.data.datasets[2].data = themeData.difficult;
+    chartInstance.update();
 }
 
 function updateProgress() {
@@ -454,13 +473,19 @@ function startStudyTimer() {
     if (!studyInterval) {
         lastInteraction = Date.now();
         studyInterval = setInterval(() => {
-            const now = Date.now();
-            studyTime += Math.floor((now - lastInteraction) / 1000);
-            lastInteraction = now;
-            localStorage.setItem('studyTime', studyTime);
+            if (document.visibilityState === 'visible') {
+                const now = Date.now();
+                studyTime += Math.floor((now - lastInteraction) / 1000);
+                lastInteraction = now;
+                localStorage.setItem('studyTime', studyTime);
+            }
         }, 1000);
     }
 }
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') stopStudyTimer();
+    else if (document.getElementById('study').classList.contains('active')) startStudyTimer();
+});
 
 function stopStudyTimer() {
     if (studyInterval) {
@@ -633,7 +658,21 @@ function toggleCardList() {
     }
 }
 
+// Função para abrir o modal de instruções
+function openInstructionsModal() {
+    instructionsModal.style.display = 'flex'; // Define explicitamente como visível
+    setTimeout(() => instructionsModal.classList.add('visible'), 10); // Adiciona a classe após um pequeno delay para transição
+}
+
+// Função para fechar o modal de instruções
+function closeInstructionsModal() {
+    instructionsModal.classList.remove('visible');
+    setTimeout(() => instructionsModal.style.display = 'none', 200); // Apenas esconde após a transição
+    localStorage.setItem('instructionsShown', 'true'); // Marca como exibido
+}
+
 // Inicialização
+// Inicialização (ajustada para capturar o modal e mostrar na primeira vez)
 document.addEventListener('DOMContentLoaded', () => {
     flashcardEl = document.getElementById('flashcard');
     themeSelect = document.getElementById('theme-select');
@@ -641,8 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
     progressEl = document.getElementById('progress');
     modal = document.getElementById('modal');
     searchInput = document.getElementById('search');
+    instructionsModal = document.getElementById('instructions-modal');
 
-    if (!flashcardEl || !themeSelect || !statsEl || !progressEl || !modal || !searchInput) {
+    if (!flashcardEl || !themeSelect || !statsEl || !progressEl || !modal || !searchInput || !instructionsModal) {
         console.error('Um ou mais elementos essenciais não foram encontrados no DOM!');
         return;
     }
@@ -656,9 +696,15 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('light');
         document.body.classList.add('dark');
     }
-    // Não chama showTab('home') aqui, já que o HTML define o estado inicial
-    const initialTab = document.querySelector('.tab-content.active');
-    if (initialTab) {
-        initialTab.style.display = 'block'; // Garante que a aba inicial esteja visível
+    showTab('home');
+
+    // Mostrar modal de instruções na primeira vez
+    if (!localStorage.getItem('instructionsShown')) {
+        openInstructionsModal();
     }
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') stopStudyTimer();
+        else if (document.getElementById('study').classList.contains('active')) startStudyTimer();
+    });
 });
