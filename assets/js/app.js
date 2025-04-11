@@ -34,10 +34,6 @@ document.addEventListener('keydown', (e) => {
 
 // Declarações globais
 const defaultFlashcards = [
-    { front: "Qual é a capital do Brasil?", back: "Brasília", theme: "Geografia", interval: 1, nextReview: Date.now(), protected: true },
-    { front: "Qual é o maior continente?", back: "Ásia", theme: "Geografia", interval: 1, nextReview: Date.now(), protected: true },
-    { front: "Quem descobriu o Brasil?", back: "Pedro Álvares Cabral", theme: "História", interval: 1, nextReview: Date.now(), protected: true },
-    { front: "O que faz display: flex?", back: "Ativa o Flexbox", theme: "Programação", interval: 1, nextReview: Date.now(), protected: true },
     { front: "Qual é a função principal dos rins?", back: "Filtrar o sangue", theme: "Nefrologia", interval: 1, nextReview: Date.now(), protected: true },
     
     // Doenças Renais Crônicas (DRC)
@@ -274,27 +270,48 @@ function deleteCard(index) {
 
 function rateDifficulty(difficulty) {
     if (filteredFlashcards.length === 0) return;
-    const card = filteredFlashcards[currentCard];
+
+    const filteredCard = filteredFlashcards[currentCard];
+    const cardIndex = flashcards.findIndex(card => 
+        card.front === filteredCard.front && 
+        card.back === filteredCard.back && 
+        card.theme === filteredCard.theme
+    );
+    
+    if (cardIndex === -1) {
+        console.error('Cartão não encontrado no array original!');
+        return;
+    }
+
+    const card = flashcards[cardIndex];
     const now = Date.now();
-    card.ease = card.ease || 2.5; // Fator inicial
+    card.ease = card.ease || 2.5;
 
     if (difficulty === 1) {
         card.interval = 1;
         card.ease = Math.max(1.3, card.ease - 0.8);
     } else if (difficulty === 2) {
-        card.interval = card.interval * card.ease;
-        card.ease -= 0.1;
+        card.interval = Math.max(1, card.interval * card.ease);
+        card.ease = Math.max(1.3, card.ease - 0.1);
     } else if (difficulty === 3) {
-        card.interval = card.interval * card.ease;
+        card.interval = Math.max(1, card.interval * card.ease);
         card.ease += 0.1;
     }
 
-    card.interval = Math.min(card.interval, 30); // Limite máximo
+    card.interval = Math.min(card.interval, 30);
     card.nextReview = now + card.interval * 24 * 60 * 60 * 1000;
-    saveFlashcards();
-    nextCard();
-}
 
+    // Log seguro para depuração
+    console.log(`Classificação: ${difficulty} - Interval: ${card.interval}, Ease: ${card.ease}, NextReview: ${new Date(card.nextReview)}`);
+
+    saveFlashcards();
+    filteredFlashcards[currentCard] = { ...card };
+    nextCard();
+
+    if (document.getElementById('stats').classList.contains('active')) {
+        updateStats();
+    }
+}
 function nextCard() {
     if (filteredFlashcards.length === 0) return;
     flashcardEl.classList.remove('flipped');
@@ -433,51 +450,47 @@ function updateStats() {
     timeStats.textContent = `Tempo de estudo: ${minutes}m ${seconds}s`;
 
     // Gráfico reutilizável
-    if (!chartInstance) {
-        chartInstance = new Chart(chartCanvas, {
-            type: 'bar',
-            data: {
-                labels: themeData.themes,
-                datasets: [
-                    {
-                        label: 'Fácil',
-                        data: [],
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Médio',
-                        data: [],
-                        backgroundColor: 'rgba(255, 206, 86, 0.7)',
-                        borderColor: 'rgba(255, 206, 86, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Difícil',
-                        data: [],
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'Número de Cartões' } },
-                    x: { title: { display: true, text: 'Temas' } }
-                },
-                plugins: {
-                    legend: { display: true, position: 'top' }
-                }
-            }
-        });
+    if (chartInstance) {
+        chartInstance.destroy(); // Destroi o gráfico anterior
     }
-    chartInstance.data.labels = themeData.themes;
-    chartInstance.data.datasets[0].data = themeData.easy;
-    chartInstance.data.datasets[1].data = themeData.medium;
-    chartInstance.data.datasets[2].data = themeData.difficult;
-    chartInstance.update();
+    chartInstance = new Chart(chartCanvas, {
+        type: 'bar',
+        data: {
+            labels: themeData.themes,
+            datasets: [
+                {
+                    label: 'Difícil',
+                    data: themeData.difficult,
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)', // Vermelho
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Médio',
+                    data: themeData.medium,
+                    backgroundColor: 'rgba(255, 206, 86, 0.7)', // Amarelo
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Fácil',
+                    data: themeData.easy,
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)', // Verde
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Número de Cartões' } },
+                x: { title: { display: true, text: 'Temas' } }
+            },
+            plugins: {
+                legend: { display: true, position: 'top' }
+            }
+        }
+    });
 }
 
 function updateProgress() {
